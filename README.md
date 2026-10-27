@@ -4,7 +4,9 @@
 **Course:** Software Design Techniques and Mechanisms (TMPS), FCIM / FAF, UTM, 2026–2027  
 **Checked by:** Istrati Daniel, asist. univ.
 
-| Folder | Laboratory work | Contents |
+Each laboratory work is on its own branch (`lab0`, `lab1`, `lab2`); `main` has all of them, one folder per lab.
+
+| Branch / folder | Laboratory work | Contents |
 |---|---|---|
 | `lab0` | Lab 0 – SOLID Principles in C# (SRP, OCP, DIP, before and after) | report (.docx + .md), C# console project |
 | `lab1` | Lab 1 – Creational Design Patterns (Singleton, Factory Method, Builder) | report (.docx + .md), C# console project |
