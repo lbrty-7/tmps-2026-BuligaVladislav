@@ -1,58 +1,83 @@
-using SrpBefore = SolidPrinciples.Srp.Before;
-using SrpAfter = SolidPrinciples.Srp.After;
-using OcpBefore = SolidPrinciples.Ocp.Before;
-using OcpAfter = SolidPrinciples.Ocp.After;
-using DipBefore = SolidPrinciples.Dip.Before;
-using DipAfter = SolidPrinciples.Dip.After;
+using System.Globalization;
+using CreationalPatterns.Builder;
+using CreationalPatterns.FactoryMethod;
+using CreationalPatterns.Models;
+using CreationalPatterns.Singleton;
+
+// same number format on every computer (350.00, not 350,00)
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 static void Title(string text)
 {
     Console.WriteLine();
-    Console.WriteLine(new string('=', 60));
+    Console.WriteLine(new string('=', 64));
     Console.WriteLine(text);
-    Console.WriteLine(new string('=', 60));
+    Console.WriteLine(new string('=', 64));
 }
 
-// ---------------- S: Single Responsibility ----------------
-Title("S - Single Responsibility Principle");
+// ---------------------------------------------------------------- Singleton
+Title("1. SINGLETON - StoreSettings");
 
-Console.WriteLine("Before: one OrderProcessor does everything");
-new SrpBefore.OrderProcessor().Process("ana@mail.md", "Clean Code", 2, 350m);
+var a = StoreSettings.Instance;
+var b = StoreSettings.Instance;
+Console.WriteLine($"  a and b are the same object: {ReferenceEquals(a, b)}");
 
-Console.WriteLine("After: OrderService coordinates small classes");
-new SrpAfter.OrderService().Place(new SrpAfter.Order("ana@mail.md", "Clean Code", 2, 350m));
+// 10 threads ask for the instance at the same time
+var fromThreads = new StoreSettings[10];
+Parallel.For(0, 10, i => fromThreads[i] = StoreSettings.Instance);
+Console.WriteLine($"  10 threads got the same object: {fromThreads.All(s => ReferenceEquals(s, a))}");
+Console.WriteLine($"  constructor ran {StoreSettings.CreatedCount} time(s)");
+Console.WriteLine($"  settings: {a.StoreName}, VAT {a.Vat * 100:0}%, free delivery from {a.FreeDeliveryFrom} {a.Currency}");
 
-// ---------------- O: Open/Closed ----------------
-Title("O - Open/Closed Principle");
+// ---------------------------------------------------------------- Factory Method
+Title("2. FACTORY METHOD - BookCreator");
 
-const decimal amount = 800m;
-Console.WriteLine("Before: switch on a string");
-var oldCalc = new OcpBefore.DiscountCalculator();
-foreach (var type in new[] { "Regular", "Student", "Vip" })
-    Console.WriteLine($"  {type,-12} {amount} -> {oldCalc.Apply(type, amount):0.00}");
-try { oldCalc.Apply("BlackFriday", amount); }
-catch (ArgumentException e) { Console.WriteLine($"  BlackFriday  -> ERROR: {e.Message} (class must be edited)"); }
+BookCreator[] creators = { new PrintedBookCreator(), new EBookCreator(), new AudioBookCreator() };
+var books = new List<Book>();
+foreach (var creator in creators)
+    books.Add(creator.Publish("Clean Code", "Robert C. Martin"));
 
-Console.WriteLine("After: one class per policy, new policy added without edits");
-var newCalc = new OcpAfter.DiscountCalculator();
-OcpAfter.IDiscountPolicy[] policies =
+Book printed = books[0], ebook = books[1], audio = books[2];
+Book patterns = new PrintedBookCreator().Publish("Design Patterns", "Gamma et al.");
+
+// ---------------------------------------------------------------- Builder
+Title("3. BUILDER - OrderBuilder and OrderDirector");
+
+Console.WriteLine("a) full order, built step by step:");
+Order gift = new OrderBuilder("ana@mail.md")
+    .AddBook(printed)
+    .AddBook(patterns)
+    .ShipTo("str. Studenților 9/7, Chișinău")
+    .WithGiftWrap("La mulți ani!")
+    .WithPromoCode("FAF2026")
+    .Build();
+gift.Print();
+
+Console.WriteLine();
+Console.WriteLine("b) minimal order, only the required parts:");
+Order simple = new OrderBuilder("ion@mail.md")
+    .AddBook(printed)
+    .ShipTo("bd. Dacia 41, Chișinău")
+    .Build();
+simple.Print();
+
+Console.WriteLine();
+Console.WriteLine("c) ready-made recipe from the Director:");
+Order pack = new OrderDirector().StudentDigitalPack("vlad@mail.md", ebook, audio);
+pack.Print();
+
+Console.WriteLine();
+Console.WriteLine("d) Build() refuses an invalid order:");
+try
 {
-    new OcpAfter.RegularDiscount(), new OcpAfter.StudentDiscount(),
-    new OcpAfter.VipDiscount(), new OcpAfter.BlackFridayDiscount()
-};
-foreach (var p in policies)
-    Console.WriteLine($"  {p.Name,-12} {amount} -> {newCalc.Apply(p, amount):0.00}");
+    new OrderBuilder("test@mail.md").AddBook(printed).Build();
+}
+catch (InvalidOperationException e)
+{
+    Console.WriteLine($"  ERROR: {e.Message}");
+}
 
-// ---------------- D: Dependency Inversion ----------------
-Title("D - Dependency Inversion Principle");
-
-Console.WriteLine("Before: service creates SmtpEmailSender itself");
-new DipBefore.OrderNotificationService().NotifyShipped("ana@mail.md", "Clean Code");
-
-Console.WriteLine("After: sender is injected through an interface");
-new DipAfter.OrderNotificationService(new DipAfter.SmtpEmailSender()).NotifyShipped("ana@mail.md", "Clean Code");
-new DipAfter.OrderNotificationService(new DipAfter.SmsSender()).NotifyShipped("+37369000000", "Clean Code");
-
-var fake = new DipAfter.FakeSender();
-new DipAfter.OrderNotificationService(fake).NotifyShipped("test@mail.md", "Clean Code");
-Console.WriteLine($"  [TEST] fake sender recorded {fake.Sent.Count} message: {fake.Sent[0]}");
+Console.WriteLine();
+Console.WriteLine($"Order numbers came from the single StoreSettings: #{gift.Number}, #{simple.Number}, #{pack.Number}");

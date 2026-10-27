@@ -6,7 +6,7 @@
 
 | Folder | Laboratory work | Contents |
 |---|---|---|
-| `lab1` | Lab 1 – SOLID Principles in C# (SRP, OCP, DIP, before and after) | report (.docx + .md), C# console project |
+| `lab1` | Lab 1 – Creational Design Patterns (Singleton, Factory Method, Builder) | report (.docx + .md), C# console project |
 
 ## Running lab 1
 
