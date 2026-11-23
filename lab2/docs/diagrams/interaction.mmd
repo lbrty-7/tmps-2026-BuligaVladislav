@@ -1,0 +1,44 @@
+classDiagram
+direction LR
+class Program {
+  <<Client>>
+}
+class CheckoutRequestBuilder {
+  <<Builder · from Lab 1>>
+  +For(string email) CheckoutRequestBuilder
+  +ShipTo(string address) CheckoutRequestBuilder
+  +PayWith(IPaymentMethod payment) CheckoutRequestBuilder
+  +With(Func~IOrderCost,IOrderCost~ extra) CheckoutRequestBuilder
+  +Build() CheckoutRequest
+}
+class CheckoutRequest {
+  <<record>>
+  +Email string
+  +Address string
+  +Payment IPaymentMethod
+  +Extras IReadOnlyList~Func~
+}
+class CheckoutFacade {
+  <<Facade>>
+  +PlaceOrder(Cart cart, CheckoutRequest request) CheckoutResult
+}
+class IOrderCost {
+  <<Decorator · Component>>
+}
+class INotificationChannel {
+  <<Adapter · Target>>
+}
+class SmtpEmailChannel {
+  <<Adapter>>
+}
+class SmtpClient {
+  <<Adaptee · .NET>>
+}
+Program ..> CheckoutRequestBuilder : uses
+CheckoutRequestBuilder ..> CheckoutRequest : builds
+Program --> CheckoutFacade : PlaceOrder(cart, request)
+CheckoutFacade ..> CheckoutRequest : reads
+CheckoutFacade ..> IOrderCost : applies Extras
+CheckoutFacade --> INotificationChannel : confirmation
+INotificationChannel <|.. SmtpEmailChannel
+SmtpEmailChannel --> SmtpClient

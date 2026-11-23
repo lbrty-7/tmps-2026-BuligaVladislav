@@ -1,0 +1,1 @@
+{ "theme": "base", "themeVariables": { "primaryColor": "#ffffff", "primaryBorderColor": "#222222", "primaryTextColor": "#111111", "lineColor": "#222222", "fontFamily": "Arial, Helvetica, sans-serif", "fontSize": "14px", "noteBkgColor": "#ffffff", "noteBorderColor": "#555555", "noteTextColor": "#111111" }, "class": { "hideEmptyMembersBox": true } }

@@ -1,0 +1,37 @@
+classDiagram
+direction TB
+class CheckoutFacade {
+  <<Client>>
+  -_notifications INotificationChannel
+  +PlaceOrder(Cart cart, CheckoutRequest request) CheckoutResult
+}
+class INotificationChannel {
+  <<Target · interface>>
+  +Name string
+  +Send(string recipient, string subject, string body) DeliveryResult
+}
+class SmtpEmailChannel {
+  <<Adapter>>
+  -_smtp SmtpClient
+  -_from MailAddress
+  +Send(string recipient, string subject, string body) DeliveryResult
+  +ToPickupDirectory(string dir, string from)$ SmtpEmailChannel
+}
+class SmtpClient {
+  <<Adaptee · System.Net.Mail>>
+  +DeliveryMethod SmtpDeliveryMethod
+  +PickupDirectoryLocation string
+  +Send(MailMessage message) void
+}
+class MailMessage {
+  <<System.Net.Mail>>
+  +From MailAddress
+  +To MailAddressCollection
+  +Subject string
+  +Body string
+}
+CheckoutFacade --> INotificationChannel : _notifications
+INotificationChannel <|.. SmtpEmailChannel : implements
+SmtpEmailChannel --> SmtpClient : _smtp (adaptee)
+SmtpEmailChannel ..> MailMessage : creates
+note for SmtpEmailChannel "Send():<br/>message = new MailMessage(_from, new MailAddress(recipient))<br/>_smtp.Send(message)<br/>FormatException / SmtpException -> DeliveryResult(false, ...)"

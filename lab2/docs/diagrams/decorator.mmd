@@ -1,0 +1,51 @@
+classDiagram
+direction TB
+class IOrderCost {
+  <<Component · interface>>
+  +Cost() decimal
+  +Description() string
+}
+class BooksCost {
+  <<ConcreteComponent>>
+  -_cart Cart
+  +Cost() decimal
+  +Description() string
+}
+class OrderCostDecorator {
+  <<Decorator · abstract>>
+  #Inner IOrderCost
+  +Cost() decimal
+  +Description() string
+}
+class GiftWrapDecorator {
+  <<ConcreteDecorator>>
+  +Fee = 25$
+  +Cost() decimal
+  +Description() string
+}
+class ExpressDeliveryDecorator {
+  <<ConcreteDecorator>>
+  +Fee = 80$
+  +Cost() decimal
+  +Description() string
+}
+class InsuranceDecorator {
+  <<ConcreteDecorator>>
+  +Cost() decimal
+  +Description() string
+}
+class StudentDiscountDecorator {
+  <<ConcreteDecorator>>
+  +Cost() decimal
+  +Description() string
+}
+IOrderCost <|.. BooksCost : implements
+IOrderCost <|.. OrderCostDecorator : implements
+OrderCostDecorator o--> IOrderCost : Inner
+OrderCostDecorator <|-- GiftWrapDecorator
+OrderCostDecorator <|-- ExpressDeliveryDecorator
+OrderCostDecorator <|-- InsuranceDecorator
+OrderCostDecorator <|-- StudentDiscountDecorator
+note for OrderCostDecorator "Cost() => Inner.Cost()"
+note for GiftWrapDecorator "Cost() => Inner.Cost() + Fee"
+note for InsuranceDecorator "Cost() => Round(Inner.Cost() * 1.02)"
