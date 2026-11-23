@@ -1,0 +1,59 @@
+classDiagram
+direction TB
+class Program {
+  <<Client>>
+}
+class CheckoutFacade {
+  <<Facade>>
+  -_inventory IInventory
+  -_shipping IShippingService
+  -_notifications INotificationChannel
+  +PlaceOrder(Cart cart, CheckoutRequest request) CheckoutResult
+}
+namespace subsystem {
+  class IInventory {
+    <<interface>>
+    +TryReserve(Cart cart, out string problem) bool
+    +Release(Cart cart) void
+  }
+  class InventoryService {
+    +TryReserve(Cart cart, out string problem) bool
+    +Release(Cart cart) void
+  }
+  class IShippingService {
+    <<interface>>
+    +CreateShipment(string address) string
+  }
+  class ShippingService {
+    +CreateShipment(string address) string
+  }
+  class IPaymentMethod {
+    <<interface>>
+    +Charge(decimal amountMdl) PaymentResult
+  }
+  class CardPayment {
+    +Charge(decimal amountMdl) PaymentResult
+  }
+  class IOrderCost {
+    <<interface>>
+    +Cost() decimal
+  }
+  class INotificationChannel {
+    <<interface>>
+    +Send(string recipient, string subject, string body) DeliveryResult
+  }
+  class SmtpEmailChannel {
+    +Send(string recipient, string subject, string body) DeliveryResult
+  }
+}
+Program --> CheckoutFacade : PlaceOrder()
+CheckoutFacade --> IInventory : 1. reserve / release
+CheckoutFacade ..> IOrderCost : 2. price (decorators)
+CheckoutFacade ..> IPaymentMethod : 3. charge (request.Payment)
+CheckoutFacade --> IShippingService : 4. ship
+CheckoutFacade --> INotificationChannel : 5. notify
+IInventory <|.. InventoryService
+IShippingService <|.. ShippingService
+IPaymentMethod <|.. CardPayment
+INotificationChannel <|.. SmtpEmailChannel
+note for CheckoutFacade "PlaceOrder():<br/>if !TryReserve -> fail<br/>total = extras applied to BooksCost<br/>if !Charge(total) -> Release, fail<br/>CreateShipment(); Send(confirmation)"
