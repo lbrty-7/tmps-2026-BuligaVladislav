@@ -1,4 +1,4 @@
-namespace StructuralPatterns.Models;
+namespace Bookstore.Domain;
 
 public record CartItem(string Isbn, string Title, decimal Price, int Quantity)
 {
@@ -18,4 +18,6 @@ public class Cart
     }
 
     public decimal Subtotal => _items.Sum(i => i.LineTotal);
+
+    public int BookCount => _items.Sum(i => i.Quantity);
 }
