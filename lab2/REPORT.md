@@ -586,6 +586,25 @@ The numbers can be checked by hand. Order a) costs (2 × 350 + 25) × 0.9 = 652.
 
 All 11 tests run with one command, dotnet test, from the lab2 folder: 2 for the Adapter, 4 for the Decorator (one of them a theory with 2 cases), 3 for the Facade and 2 for the Builder.
 
+The tests were run on macOS (Apple Silicon) with the .NET 8 SDK. All 11 passed:
+
+*Listing 3.8 – Output of dotnet test*
+
+```text
+$ dotnet test
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Bookstore.Core -> .../lab2/src/Bookstore.Core/bin/Debug/net8.0/Bookstore.Core.dll
+  Bookstore.Tests -> .../lab2/tests/Bookstore.Tests/bin/Debug/net8.0/Bookstore.Tests.dll
+Test run for .../lab2/tests/Bookstore.Tests/bin/Debug/net8.0/Bookstore.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.11.1 (arm64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    11, Skipped:     0, Total:    11, Duration: 10 ms - Bookstore.Tests.dll (net8.0)
+```
+
 
 ## 4 RESULTS
 
